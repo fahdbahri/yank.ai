@@ -1,13 +1,17 @@
 {
-  "name": "yank.ai",
-  "description": "Copy test directly from videos",
-  "version": "1.0",
   "manifest_version": 3,
-  "icons": {
-    "16": "icon/main.png"
-  },
+  "name": "Yank.ai",
+  "version": "1.0",
+  "description": "Copy text directly from videos.",
+  "permissions": ["activeTab", "scripting", "clipboardWrite"],
   "action": {
-    "default_popup": "src/popup/popup.html"
-  }
+    "default_popup": "src/popup/popup.html",
+    "default_icon": "icons/icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/content/content.js"]
+    }
+  ]
 }
-
