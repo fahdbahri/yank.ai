@@ -1,13 +1,32 @@
 {
-  "name": "yank.ai",
-  "description": "Copy test directly from videos",
-  "version": "1.0",
   "manifest_version": 3,
-  "icons": {
-    "16": "icon/main.png"
+  "name": "Yank.ai",
+  "version": "1.0",
+  "description": "Select text from videos using AI",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
+  "permissions": ["tabs", "activeTab", "scripting", "storage"],
+  "host_permissions": ["*://*.youtube.com/*"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/offscreen/offscreen.html",
+        "assets/lib/worker.min.js",
+        "assets/lib/tesseract-core.wasm.js",
+        "assets/lib/lang-data/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+"content_scripts": [
+  {
+    "matches": ["*://*.youtube.com/*"],
+    "js": ["src/content/content.js"]
+  }
+],
   "action": {
-    "default_popup": "src/popup/popup.html"
+    "default_popup": "src/popup/popup.html",
+    "default_icon": "icon/main.png"
   }
 }
-
