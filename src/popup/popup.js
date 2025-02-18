@@ -2,7 +2,6 @@ let isEnabled = false;
 
 document.addEventListener('DOMContentLoaded', function () {
   const button = document.getElementById('toggleButton');
- 
 
   // Load the saved state from storage
   chrome.storage.local.get(['isEnabled'], function (result) {
@@ -14,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     const url = tabs[0].url;
     if (!url || !url.includes('youtube.com/watch')) {
-      button.disabled = true; 
+      button.disabled = true;
       return;
     }
   });
