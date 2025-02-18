@@ -1,13 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Yank.ai MVP</title>
-    <link rel="stylesheet" href="popup.css">
+    <title>Yank.ai</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 300px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #toggleButton {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #toggleButton:hover {
+            background-color: #45a049;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 50px;
+        }
+    </style>
 </head>
 <body>
     <h1>Yank AI</h1>
-    <button id="toggleButton">Enable</button>
-    <div id="output"></div>
+    <button id="toggleButton">Enable</button> 
     <script type="module" src="popup.js"></script>
 </body>
 </html>
