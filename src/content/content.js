@@ -39,8 +39,6 @@ function createTextOverlay(textBlocks, videoPlayer, frameWidth, frameHeight) {
     pointer-events: auto; /* Enable text selection */
     user-select: text; /* Allow default text selection */
     font-family: Arial, sans-serif;
-    font-size: 14px;
-    color: black;
     white-space: pre-wrap; /* Preserve line breaks and spaces */
   `;
 
@@ -48,13 +46,20 @@ function createTextOverlay(textBlocks, videoPlayer, frameWidth, frameHeight) {
   textBlocks.forEach((block) => {
     const textElement = document.createElement("span");
     textElement.textContent = block.text + " "; // Add space between words/phrases
+
+    // Calculate font size based on the height of the bounding box
+    const boundingBoxHeight = block.bottom - block.top; // Height of the text in the frame
+    const fontSize = boundingBoxHeight * scaleY; // Scale the font size to match the video player
+
     textElement.style.cssText = `
       position: absolute;
       top: ${block.top * scaleY}px;
       left: ${block.left * scaleX}px;
       background: rgba(255, 255, 0, 0.5); /* Highlight color */
-      padding: 2px 4px;
+      padding: 0; /* Remove padding to avoid affecting size */
       border-radius: 4px;
+      font-size: ${fontSize}px; /* Set font size dynamically */
+      line-height: 1; /* Prevent extra spacing */
     `;
     textContainer.appendChild(textElement);
   });
@@ -111,6 +116,8 @@ async function recognizeTextWithGoogleVision(imageDataUrl) {
       text: annotation.description,
       top: vertices[0].y || 0,
       left: vertices[0].x || 0,
+      bottom: vertices[2].y || 0,
+      right: vertices[2].x || 0,
     };
   });
   return textBlocks;
@@ -118,10 +125,20 @@ async function recognizeTextWithGoogleVision(imageDataUrl) {
 
 function toggleYankButton(shouldShow) {
   console.log("Toggle Yank Button called with:", shouldShow);
+
+  // Remove any existing toggle button
   const existingButton = document.getElementById("yank-toggle");
   if (existingButton) {
     existingButton.remove();
   }
+
+  // Remove the overlay if it exists and shouldShow is false
+  const existingOverlay = document.getElementById("yank-text-overlay");
+  if (!shouldShow && existingOverlay) {
+    existingOverlay.remove();
+    return;
+  }
+
   const videoContainer = document.querySelector(".html5-video-player");
   if (!videoContainer) {
     console.log("No video player found");
@@ -132,6 +149,7 @@ function toggleYankButton(shouldShow) {
     console.log("No video element found");
     return;
   }
+
   if (shouldShow) {
     const button = document.createElement("button");
     button.id = "yank-toggle";
@@ -156,6 +174,7 @@ function toggleYankButton(shouldShow) {
     button.style.background = "#2196F3";
     button.onmouseenter = () => (button.style.opacity = "1");
     button.onmouseleave = () => (button.style.opacity = "0.8");
+
     button.onclick = function (e) {
       e.stopPropagation();
       const isOn = this.textContent === "ON";
@@ -182,10 +201,7 @@ function toggleYankButton(shouldShow) {
             console.log("Recognized text blocks:", textBlocks);
 
             // Display the recognized text on the video player
-            const videoPlayer = document.querySelector(".html5-video-player");
-            if (videoPlayer) {
-              createTextOverlay(textBlocks, videoPlayer, canvas.width, canvas.height);
-            }
+            createTextOverlay(textBlocks, videoContainer, canvas.width, canvas.height);
           })
           .catch((error) => {
             console.error("OCR error:", error);
@@ -198,11 +214,14 @@ function toggleYankButton(shouldShow) {
         }
       }
     };
+
     videoContainer.appendChild(button);
     button.style.display = video.paused ? "inline-block" : "none";
+
     video.addEventListener("pause", () => {
       button.style.display = "inline-block";
     });
+
     video.addEventListener("play", () => {
       button.style.display = "none";
     });
