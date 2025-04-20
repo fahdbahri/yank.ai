@@ -28,10 +28,8 @@ async function performOCR(image) {
   });
   await worker.loadLanguage("eng");
   await worker.initialize("eng");
-  const {
-    data: { text },
-  } = await worker.recognize(image);
-  console.log(text);
+  const result = await worker.recognize(image);
+  console.log("Tesseract result:", result);
   await worker.terminate();
-  return text;
+  return result;
 }

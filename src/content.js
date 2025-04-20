@@ -88,41 +88,70 @@ function captureVideoFrame(video) {
 }
 
 async function performOCR(imageDataUrl) {
-  
   try {
-
     const text = await new Promise((resolve, reject) => {
-
-      chrome.runtime.sendMessage (
-        {
-          type: "startOCR",
-          image: imageDataUrl
-        },
+      chrome.runtime.sendMessage(
+        { type: "startOCR", image: imageDataUrl },
         (response) => {
-          if(chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError)
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else if (response.error) {
+            reject(new Error(response.error));
           } else {
-            resolve(response)
+            resolve(response);
           }
         }
-      )
+      );
     });
 
-    console.log("Content OCR: ", text);
-    return [{
-      text: text,
-      top: 50,
-      bottom: 100,
-      left: 20,
-      right: 500
-    }];
-    
-  } catch (error) {
+    console.log("Content OCR response:", text);
 
-    console.error("OCR error: ", error)
+    if (!text || !text.data || !text.data.words) {
+      throw new Error("Invalid OCR response: 'data.words' not found");
+    }
+
+    // Group words into lines
+    const textBlocks = [];
+    let currentLine = { text: "", top: 0, left: 0, bottom: 0, right: 0 };
+    text.data.words.forEach((word, index) => {
+      const bbox = word.bbox;
+      const wordBlock = {
+        text: word.text,
+        top: bbox.y0,
+        left: bbox.x0,
+        bottom: bbox.y1,
+        right: bbox.x1
+      };
+
+      if (index === 0) {
+        currentLine = { ...wordBlock };
+      } else {
+        // Check if the word is on the same line (similar y0 values)
+        const yDiff = Math.abs(wordBlock.top - currentLine.top);
+        if (yDiff < 10) { // Adjust threshold as needed
+          currentLine.text += " " + wordBlock.text;
+          currentLine.left = Math.min(currentLine.left, wordBlock.left);
+          currentLine.right = Math.max(currentLine.right, wordBlock.right);
+          currentLine.top = Math.min(currentLine.top, wordBlock.top);
+          currentLine.bottom = Math.max(currentLine.bottom, wordBlock.bottom);
+        } else {
+          textBlocks.push({ ...currentLine });
+          currentLine = { ...wordBlock };
+        }
+      }
+    });
+    if (currentLine.text) {
+      textBlocks.push(currentLine);
+    }
+
+    console.log("Tesseract text blocks:", textBlocks);
+    return textBlocks;
+  } catch (error) {
+    console.error("OCR error:", error);
     throw error;
   }
 }
+
 
 function toggleYankButton(shouldShow) {
   console.log("Toggle Yank Button called with:", shouldShow);
