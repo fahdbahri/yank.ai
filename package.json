@@ -1,28 +1,23 @@
 {
-  "dependencies": {
-    "@google-cloud/vision": "^4.3.2",
-    "chrome-types": "^0.1.335",
-    "dompurify": "^3.2.4",
-    "tesseract.js": "^6.0.0"
-  },
+  "name": "yank.ai",
+  "description": "Select and area from a youtube video and process it to text.",
+  "version": "1.0",
   "scripts": {
-    "build": "NODE_ENV=production webpack"
+    "build": "webpack --config webpack.prod.js"
+  },
+  "dependencies": {
+    "tesseract.js": "^4.1.1",
+    "tesseract.js-core": "^6.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.9",
-    "@babel/preset-env": "^7.26.9",
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.0",
-    "babel-loader": "^9.2.1",
-    "copy-webpack-plugin": "^12.0.2",
-    "crypto-browserify": "^3.12.1",
-    "dotenv-webpack": "^8.1.0",
-    "html-loader": "^5.1.0",
-    "html-webpack-plugin": "^5.6.3",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "webpack": "^5.98.0",
-    "webpack-cli": "^6.0.1"
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "babel-loader": "^9.1.2",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.85.0",
+    "webpack-cli": "^5.1.1",
+    "webpack-merge": "^5.9.0"
   }
 }

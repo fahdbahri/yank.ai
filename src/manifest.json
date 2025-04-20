@@ -3,20 +3,32 @@
   "name": "Yank.ai",
   "version": "1.0",
   "description": "Select text from videos using AI",
-  "permissions": ["tabs", "storage"],
+  "permissions": ["activeTab", "storage", "scripting", "offscreen"],
   "content_security_policy": {
-      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
+  "background": {"service_worker": "background.js", "type": "module"},
   "host_permissions": ["https://www.youtube.com/*"],
   "content_scripts": [
   {
-    "matches": ["<all_urls>"],
+    "matches": ["*://*.youtube.com/*"],
     "js": ["content.js"]
   }
-  
+],
+
+"web_accessible_resources": [
+  {
+  "resources": [
+    "worker.min.js",
+    "tesseract-core.wasm",
+    "tesseract-core.wasm.js"
+    
+    ],
+    "matches": ["<all_urls>"]
+  } 
 ],
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon/main.png"
+    "default_icon": "main.png"
   }
 }

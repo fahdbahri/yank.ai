@@ -77,6 +77,7 @@ function createTextOverlay(textBlocks, videoPlayer, frameWidth, frameHeight) {
   }
 }
 
+
 function captureVideoFrame(video) {
   const canvas = document.createElement("canvas");
   canvas.width = video.videoWidth;
@@ -86,41 +87,41 @@ function captureVideoFrame(video) {
   return canvas.toDataURL("image/png"); // Convert frame to data URL
 }
 
-async function recognizeTextWithGoogleVision(imageDataUrl) {
-  const apiKey = process.env.GOOGLE_API_KEY;
-  const response = await fetch(
-    `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        requests: [
-          {
-            image: { content: imageDataUrl.split(",")[1] }, // Base64-encoded image
-            features: [{ type: "TEXT_DETECTION" }],
-          },
-        ],
-      }),
-    }
-  );
-  const result = await response.json();
-  const textAnnotations = result.responses[0]?.textAnnotations || [];
-  if (!textAnnotations.length) {
-    throw new Error("No text detected");
-  }
+async function performOCR(imageDataUrl) {
+  
+  try {
 
-  // Extract text blocks with bounding box information
-  const textBlocks = textAnnotations.slice(1).map((annotation) => {
-    const vertices = annotation.boundingPoly.vertices;
-    return {
-      text: annotation.description,
-      top: vertices[0].y || 0,
-      left: vertices[0].x || 0,
-      bottom: vertices[2].y || 0,
-      right: vertices[2].x || 0,
-    };
-  });
-  return textBlocks;
+    const text = await new Promise((resolve, reject) => {
+
+      chrome.runtime.sendMessage (
+        {
+          type: "startOCR",
+          image: imageDataUrl
+        },
+        (response) => {
+          if(chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError)
+          } else {
+            resolve(response)
+          }
+        }
+      )
+    });
+
+    console.log("Content OCR: ", text);
+    return [{
+      text: text,
+      top: 50,
+      bottom: 100,
+      left: 20,
+      right: 500
+    }];
+    
+  } catch (error) {
+
+    console.error("OCR error: ", error)
+    throw error;
+  }
 }
 
 function toggleYankButton(shouldShow) {
@@ -175,7 +176,7 @@ function toggleYankButton(shouldShow) {
     button.onmouseenter = () => (button.style.opacity = "1");
     button.onmouseleave = () => (button.style.opacity = "0.8");
 
-    button.onclick = function (e) {
+    button.onclick = async function (e) {
       e.stopPropagation();
       const isOn = this.textContent === "ON";
       this.textContent = isOn ? "OFF" : "ON";
@@ -195,8 +196,8 @@ function toggleYankButton(shouldShow) {
 
         console.log("Sending imageDataUrl:", imageDataUrl);
 
-        // Send the image to Google Cloud Vision API for OCR
-        recognizeTextWithGoogleVision(imageDataUrl)
+      
+        await performOCR(imageDataUrl)
           .then((textBlocks) => {
             console.log("Recognized text blocks:", textBlocks);
 
