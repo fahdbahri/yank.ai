@@ -16,6 +16,13 @@
   }
 ],
 
+"icons": {
+
+  "16": "main.png",
+  "48": "main.png",
+  "128": "main.png"
+},
+
 "web_accessible_resources": [
   {
   "resources": [
